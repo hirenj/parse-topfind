@@ -5,7 +5,7 @@ SQLFILE=/Scratch/topfind/2015_08_20_TopFIND.sql
 TABLESPATH=$(basename $SQLFILE)
 
 if [ ! -d "$TABLESPATH.tables" ]; then
-	ruby extract_tables.rb $SQLFILE
+	python extract_tables.py $SQLFILE
 fi
 
 # We need to remove extra quote characters from the extracted fields
