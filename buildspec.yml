@@ -1,0 +1,15 @@
+version: 0.1
+
+phases:
+  install:
+    commands:
+      - echo "No dependencies to install"
+  pre_build:
+    commands:
+      - checkversion --remote 'http://clipserve.clip.ubc.ca/topfind/download' --regex 'downloads/([\d_A-Za-z]+)\.sql' --print-remote --s3path "s3:::${BUILD_OUTPUT_BUCKET}/${BUILD_OUTPUT_PREFIX}/topfind.tsv" > $CODEBUILD_SRC_DIR/target_version.txt
+  build:
+    commands:
+      - echo "Skipping build"
+  post_build:
+    commands:
+      - echo "Skipping post_build"
