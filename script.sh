@@ -1,6 +1,11 @@
 #!/bin/bash
 
-SQLFILE=/Scratch/topfind/2015_08_20_TopFIND.sql
+VERSION=$1
+
+curl "http://clipserve.clip.ubc.ca/topfind/downloads/$VERSION.sql.zip" > /tmp/topfind.zip
+unzip -p /tmp/topfind.zip "$VERSION.sql" > topfind.sql
+
+SQLFILE=topfind.sql
 
 TABLESPATH=$(basename $SQLFILE)
 
@@ -66,7 +71,9 @@ SELECT_CLEAVAGE="select cleavages.idstring,evidences.methodology,proteins.name,p
 SELECT_CTERMS="select cterms.idstring,evidences.methodology from evidences left join cterm2evidences on(evidences.id = cterm2evidences.evidence_id) left join cterms on (cterm2evidences.cterm_id = cterms.id) where evidences.method != 'electronic annotation' and cterms.idstring != ''"
 SELECT_NTERMS="select nterms.idstring,evidences.methodology from evidences left join nterm2evidences on(evidences.id = nterm2evidences.evidence_id) left join nterms on (nterm2evidences.nterm_id = nterms.id) where evidences.method != 'electronic annotation' and nterms.idstring != ''"
 
-run_sql "$SELECT_CLEAVAGE" topfind.db | python expand_idstring.py > cleavages_data.csv
-run_sql "$SELECT_CTERMS" topfind.db | python expand_idstring.py > cterms_data.csv
-run_sql "$SELECT_NTERMS" topfind.db | python expand_idstring.py > nterms_data.csv
+mkdir dist
+
+run_sql "$SELECT_CLEAVAGE" topfind.db | python expand_idstring.py > dist/cleavages_data.csv
+run_sql "$SELECT_CTERMS" topfind.db | python expand_idstring.py > dist/cterms_data.csv
+run_sql "$SELECT_NTERMS" topfind.db | python expand_idstring.py > dist/nterms_data.csv
 
