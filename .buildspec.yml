@@ -3,7 +3,8 @@ version: 0.1
 phases:
   install:
     commands:
-      - echo "No dependencies to install"
+      - apt-get update -y
+      - apt-get install -y sqlite3
   pre_build:
     commands:
       - testversion 'cleavages_data.csv' --remote 'http://clipserve.clip.ubc.ca/topfind/download' --regex 'downloads/([\d_A-Za-z]+)\.sql'

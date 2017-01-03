@@ -2,7 +2,7 @@
 
 VERSION=$1
 
-curl "http://clipserve.clip.ubc.ca/topfind/downloads/$VERSION.sql.zip" > /tmp/topfind.zip
+curl -o /tmp/topfind.zip -ssS "http://clipserve.clip.ubc.ca/topfind/downloads/$VERSION.sql.zip"
 unzip -p /tmp/topfind.zip "$VERSION.sql" > topfind.sql
 
 SQLFILE=topfind.sql
@@ -39,7 +39,9 @@ run_sql() {
 	sqlite3 -header -csv "$db" "$sql"
 }
 
-rm topfind.db
+if [ -e topfind.db ]; then
+	rm topfind.db
+fi
 
 read_csv "id,idstring,pos,protease_id" "cleavages" "topfind.db"
 read_csv "id,ac,name,meropsfamily,meropssubfamily,meropscode" "proteins" "topfind.db"
