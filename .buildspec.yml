@@ -6,7 +6,8 @@ phases:
       - echo "No dependencies to install"
   pre_build:
     commands:
-      - checkversion --remote 'http://clipserve.clip.ubc.ca/topfind/download' --regex 'downloads/([\d_A-Za-z]+)\.sql' --print-remote --s3path "s3:::${BUILD_OUTPUT_BUCKET}/${BUILD_OUTPUT_PREFIX}/cleavages_data.csv" > $CODEBUILD_SRC_DIR/target_version.txt
+      - checkversion --fail-on-match --remote 'http://clipserve.clip.ubc.ca/topfind/download' --regex 'downloads/([\d_A-Za-z]+)\.sql' --print-remote --s3path "s3:::${BUILD_OUTPUT_BUCKET}/${BUILD_OUTPUT_PREFIX}/cleavages_data.csv" > $CODEBUILD_SRC_DIR/target_version.txt
+      - cat $CODEBUILD_SRC_DIR/target_version.txt
   build:
     commands:
       - echo "Skipping build"
