@@ -7,7 +7,7 @@ NR==1 {
         ix[$i] = i
 }
 NR>1 {
-    for (i=1; i <= length(out); i++) {
+    for (i=1; i in out; i++) {
         printf "%s%s", $ix[out[i]], OFS
     }
     print ""
