@@ -20,7 +20,7 @@ def extract_ids(idstring):
 		if (len(ids) < 3):
 			return []
 
-		return [ids[i] for i in [0,2,1]]
+		return [ids[i] for i in [2,0,1]]
 
 
 reader = csv.reader(fileinput.input(mode='rb'), delimiter=',')

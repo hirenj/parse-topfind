@@ -1,0 +1,32 @@
+
+{
+"sources" : {
+  "files" : [ "cleavages_data.csv","cterms_data.csv","nterms_data.csv" ]
+},
+"preprocess": {
+  "data": {
+    "$[*].uniprot" : {
+      "uniprot" : "@.substrate",
+      "protease" : "@.protease",
+      "position" : "@.position",
+      "methodology" : "@.methodology",
+      "merops" : "@.meropscode"
+    }
+  }
+},
+"template" : {
+  "data" : {
+    "$.data[*].uniprot" : {
+      "uniprot" : "$[0].uniprot",
+      "sites" : [ "$", { "ARRAY" : true, "0": "$.(@.position)", "1" : "$.(@.protease)" } ]
+    }
+  },
+  "metadata": {
+    "msdata-version" : "1.2",
+    "title" : "TopFind database",
+    "mimetype" : "application/json+cleavage"
+  }
+},
+"environment" : {
+}
+}
