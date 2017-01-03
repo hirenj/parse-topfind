@@ -17,4 +17,4 @@ phases:
       - echo "Skipping post_build"
 artifacts:
   files:
-      - dist
+    - dist
