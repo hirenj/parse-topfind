@@ -68,10 +68,10 @@ echo "Methodologies for Cterms"
 
 sqlite3 topfind.db "select evidences.methodology,count(*) from evidences left join cterm2evidences on(evidences.id = cterm2evidences.evidence_id) left join cterms on (cterm2evidences.cterm_id = cterms.id) where evidences.method != 'electronic annotation' and cterms.idstring != '' group by evidences.methodology"
 
-SELECT_CLEAVAGE="select cleavages.idstring,evidences.methodology,proteins.name,proteins.meropsfamily,proteins.meropssubfamily,proteins.meropscode from evidences left join cleavage2evidences on(evidences.id = cleavage2evidences.evidence_id) left join cleavages on (cleavage2evidences.cleavage_id = cleavages.id) join proteins on (cleavages.protease_id = proteins.id) where evidences.method != 'electronic annotation'"
+SELECT_CLEAVAGE="select distinct cleavages.idstring,evidences.methodology,proteins.name,proteins.meropsfamily,proteins.meropssubfamily,proteins.meropscode from evidences left join cleavage2evidences on(evidences.id = cleavage2evidences.evidence_id) left join cleavages on (cleavage2evidences.cleavage_id = cleavages.id) join proteins on (cleavages.protease_id = proteins.id) where evidences.method != 'electronic annotation'"
 
-SELECT_CTERMS="select cterms.idstring,evidences.methodology from evidences left join cterm2evidences on(evidences.id = cterm2evidences.evidence_id) left join cterms on (cterm2evidences.cterm_id = cterms.id) where evidences.method != 'electronic annotation' and cterms.idstring != ''"
-SELECT_NTERMS="select nterms.idstring,evidences.methodology from evidences left join nterm2evidences on(evidences.id = nterm2evidences.evidence_id) left join nterms on (nterm2evidences.nterm_id = nterms.id) where evidences.method != 'electronic annotation' and nterms.idstring != ''"
+SELECT_CTERMS="select distinct cterms.idstring,evidences.methodology from evidences left join cterm2evidences on(evidences.id = cterm2evidences.evidence_id) left join cterms on (cterm2evidences.cterm_id = cterms.id) where evidences.method != 'electronic annotation' and cterms.idstring != ''"
+SELECT_NTERMS="select distinct nterms.idstring,evidences.methodology from evidences left join nterm2evidences on(evidences.id = nterm2evidences.evidence_id) left join nterms on (nterm2evidences.nterm_id = nterms.id) where evidences.method != 'electronic annotation' and nterms.idstring != ''"
 
 mkdir dist
 
