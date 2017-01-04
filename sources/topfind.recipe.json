@@ -12,7 +12,7 @@
       "merops" : "@.meropscode",
       "meropsdb" : "true"
     },
-    "$[?(! @.meropscode && @.methodology != 'unknown')].methodology" : {
+    "$[?(! @.meropscode && @.methodology != 'unknown')].uniprot" : {
       "uniprot" : "@.substrate",
       "position" : "@.position",
       "methodology" : "@.methodology",
