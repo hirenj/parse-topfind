@@ -1,24 +1,46 @@
 
 {
 "sources" : {
-  "files" : [ "cleavages_data.csv","cterms_data.csv","nterms_data.csv" ]
+  "files" : [ "cterms_data.csv","cleavages_data.csv","nterms_data.csv" ]
 },
 "preprocess": {
   "data": {
-    "$[*].uniprot" : {
+    "$[?(@.meropscode)].uniprot" : {
       "uniprot" : "@.substrate",
       "protease" : "@.protease",
       "position" : "@.position",
+      "merops" : "@.meropscode",
+      "meropsdb" : "true"
+    },
+    "$[?(! @.meropscode && @.methodology != 'unknown')].methodology" : {
+      "uniprot" : "@.substrate",
+      "position" : "@.position",
       "methodology" : "@.methodology",
-      "merops" : "@.meropscode"
+      "highthroughput" : "true"
+    },
+    "$[?(! @.meropscode && @.methodology == 'unknown')].uniprot" : {
+      "uniprot" : "@.substrate",
+      "position" : "@.position",
+      "highthroughput" : "unknown"
     }
   }
 },
 "template" : {
   "data" : {
-    "$.data[*].uniprot" : {
-      "uniprot" : "$[0].uniprot",
-      "sites" : [ "$", { "ARRAY" : true, "0": "$.(@.position)", "1" : "$.(@.protease)" } ]
+    "$.data.*[?(@.meropsdb)].uniprot" : {
+      "uniprot" : "@.uniprot",
+      "site" : "@.position",
+      "protease" : "@.protease",
+      "merops" : "@.merops"
+    },
+    "$.data.*[?(@.highthroughput == 'true')].uniprot" : {
+      "uniprot" : "@.uniprot",
+      "site" : "@.position",
+      "method" : "@.methodology"
+    },
+    "$.data.*[?(@.highthroughput == 'unknown')].uniprot" : {
+      "uniprot" : "@.uniprot",
+      "site" : "@.position"
     }
   },
   "metadata": {
