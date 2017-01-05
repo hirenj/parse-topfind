@@ -45,6 +45,8 @@
   },
   "metadata": {
     "msdata-version" : "1.2",
+    "data-version" : "$.(version)",
+    "software" : {"ARRAY": "true", "0" : { "name" : "hirenj/parse-topfind", "version" : "$.(git)" , "run-date" : "$.(timestamp)" }},
     "title" : "TopFind database",
     "mimetype" : "application/json+cleavage"
   }
