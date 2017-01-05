@@ -8,17 +8,17 @@ phases:
       - npm install -g hirenj/node-reciperunner
   pre_build:
     commands:
-      - testversion 'cleavages_data.csv' --remote 'http://clipserve.clip.ubc.ca/topfind/download' --regex 'downloads/([\d_A-Za-z]+)\.sql'
+      - testversion 'topfind.json' --remote 'http://clipserve.clip.ubc.ca/topfind/download' --regex 'downloads/([\d_A-Za-z]+)\.sql'
   build:
     commands:
       - echo "Running build step"
       - bash ./script.sh $TARGETVERSION
       - mv dist/*.csv sources/
-      - run_recipe --input sources --output json
+      - runrecipe --input sources --output json
       - mv json/sources_topfind.json dist/topfind.json
   post_build:
     commands:
       - echo "Skipping post_build"
 artifacts:
   files:
-    - output
+    - dist

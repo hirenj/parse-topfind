@@ -2,7 +2,12 @@
 
 VERSION=$1
 
-curl -o /tmp/topfind.zip -ssS "http://clipserve.clip.ubc.ca/topfind/downloads/$VERSION.sql.zip"
+if [ ! -e /tmp/topfind.zip ]; then
+	# Cached get file ?
+	curl -o /tmp/topfind.zip -ssS "http://clipserve.clip.ubc.ca/topfind/downloads/$VERSION.sql.zip"
+fi
+
+
 unzip -p /tmp/topfind.zip "$VERSION.sql" > topfind.sql
 
 SQLFILE=topfind.sql
