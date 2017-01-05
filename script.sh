@@ -22,13 +22,21 @@ fi
 # since awk doesnt handle those fields well.
 
 cat $TABLESPATH.tables/cleavages.sql | python mysqldump_to_csv.py > cleavages.csv
+head cleavages.csv
 cat $TABLESPATH.tables/proteins.sql | python mysqldump_to_csv.py | sed -e 's/,"[^"]*/,"/g' > proteins.csv
+head proteins.csv
 cat $TABLESPATH.tables/evidences.sql | python mysqldump_to_csv.py | sed -e 's/"""[^"]*""/"/' | sed -e 's/,"[^"]*/,"/g' > evidences.csv
+head evidences.csv
 cat $TABLESPATH.tables/cleavage2evidences.sql | python mysqldump_to_csv.py > cleavage2evidences.csv
+head cleavage2evidences.csv
 cat $TABLESPATH.tables/cterms.sql | python mysqldump_to_csv.py | sed -e 's/,"[^"]*/,"/g' > cterms.csv
+head cterms.csv
 cat $TABLESPATH.tables/nterms.sql | python mysqldump_to_csv.py | sed -e 's/,"[^"]*/,"/g' > nterms.csv
+head nterms.csv
 cat $TABLESPATH.tables/cterm2evidences.sql | python mysqldump_to_csv.py > cterm2evidences.csv
+head cterm2evidences.csv
 cat $TABLESPATH.tables/nterm2evidences.sql | python mysqldump_to_csv.py > nterm2evidences.csv
+head nterm2evidences.csv
 
 read_csv() {
 	ids=$1
