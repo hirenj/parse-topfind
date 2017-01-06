@@ -8,7 +8,7 @@ curl="curl -ssS"
 cached_curl
 
 if [ $? -eq 0 ]; then
-	curl="./cached_curl"
+	curl="cached_curl"
 fi
 
 print_table() {
