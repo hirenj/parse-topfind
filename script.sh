@@ -2,15 +2,27 @@
 
 version=$1
 
+
+curl="curl -ssS"
+
+cached_curl
+
+if [ $? -eq 0 ]; then
+	curl="./cached_curl"
+fi
+
 print_table() {
 	sed -e 's/|/,/g' | ./csv2ascii.py - -w 160
 }
 
-if [ ! -e /tmp/topfind.zip ]; then
+if [[ ! -e /tmp/topfind.zip ]]; then
 	# Cached get file ?
-	curl -o /tmp/topfind.zip -ssS "http://clipserve.clip.ubc.ca/topfind/downloads/${version}.sql.zip"
+	$curl "http://clipserve.clip.ubc.ca/topfind/downloads/${version}.sql.zip" > /tmp/topfind.zip
+	if [ $? -gt 0 ]; then
+		echo "Failed to retrieve TopFIND data"
+		exit 1
+	fi
 fi
-
 
 unzip -p /tmp/topfind.zip "${version}.sql" > topfind.sql
 
