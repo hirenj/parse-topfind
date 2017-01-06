@@ -8,7 +8,7 @@ print_table() {
 
 if [ ! -e /tmp/topfind.zip ]; then
 	# Cached get file ?
-	curl -trycache -o /tmp/topfind.zip -ssS "http://clipserve.clip.ubc.ca/topfind/downloads/${version}.sql.zip"
+	curl -o /tmp/topfind.zip -ssS "http://clipserve.clip.ubc.ca/topfind/downloads/${version}.sql.zip"
 fi
 
 
