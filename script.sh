@@ -2,6 +2,10 @@
 
 VERSION=$1
 
+print_table() {
+	sed -e 's/|/,/g' | ./csv2ascii.py - -w 160
+}
+
 if [ ! -e /tmp/topfind.zip ]; then
 	# Cached get file ?
 	curl -o /tmp/topfind.zip -ssS "http://clipserve.clip.ubc.ca/topfind/downloads/$VERSION.sql.zip"
@@ -14,7 +18,7 @@ SQLFILE=topfind.sql
 
 TABLESPATH=$(basename $SQLFILE)
 
-if [ ! -d "$TABLESPATH.tables" ]; then
+if [[ ! -d "$TABLESPATH.tables" || ! -f "$TABLESPATH.tables/cleavages.sql" ]]; then
 	python extract_tables.py $SQLFILE
 fi
 
@@ -22,28 +26,28 @@ fi
 # since awk doesnt handle those fields well.
 
 cat $TABLESPATH.tables/cleavages.sql | python mysqldump_to_csv.py > cleavages.csv
-head cleavages.csv
+head -n 2 cleavages.csv | print_table
 cat $TABLESPATH.tables/proteins.sql | python mysqldump_to_csv.py | sed -e 's/,"[^"]*/,"/g' > proteins.csv
-head proteins.csv
+head -n 2 proteins.csv | print_table
 cat $TABLESPATH.tables/evidences.sql | python mysqldump_to_csv.py | sed -e 's/"""[^"]*""/"/' | sed -e 's/,"[^"]*/,"/g' > evidences.csv
-head evidences.csv
+head -n 2 evidences.csv | print_table
 cat $TABLESPATH.tables/cleavage2evidences.sql | python mysqldump_to_csv.py > cleavage2evidences.csv
-head cleavage2evidences.csv
+head -n 2 cleavage2evidences.csv | print_table
 cat $TABLESPATH.tables/cterms.sql | python mysqldump_to_csv.py | sed -e 's/,"[^"]*/,"/g' > cterms.csv
-head cterms.csv
+head -n 2 cterms.csv | print_table
 cat $TABLESPATH.tables/nterms.sql | python mysqldump_to_csv.py | sed -e 's/,"[^"]*/,"/g' > nterms.csv
-head nterms.csv
+head -n 2 nterms.csv | print_table
 cat $TABLESPATH.tables/cterm2evidences.sql | python mysqldump_to_csv.py > cterm2evidences.csv
-head cterm2evidences.csv
+head -n 2 cterm2evidences.csv | print_table
 cat $TABLESPATH.tables/nterm2evidences.sql | python mysqldump_to_csv.py > nterm2evidences.csv
-head nterm2evidences.csv
+head -n 2 nterm2evidences.csv | print_table
 
 read_csv() {
 	ids=$1
 	csv=$2
 	dbfile=$3
 	sqlite3 $dbfile "CREATE TABLE $csv($ids)"
-	awk -F',' -f extract_field.awk -v cols="$ids" "$csv.csv" | sed -e 's/\|$//' -e 's/ \| //' | sqlite3 $dbfile ".import /dev/stdin $csv"
+	awk -F',' -f extract_field.awk -v cols="$ids" "$csv.csv" | sed -e 's/|$//' -e 's/ | //' | sqlite3 $dbfile ".import /dev/stdin $csv"
 }
 
 run_sql() {
@@ -67,26 +71,28 @@ read_csv "id,evidence_id,cterm_id" "cterm2evidences" "topfind.db"
 
 echo "Evidence methodologies for electronic annotations"
 
-sqlite3 topfind.db "select method,methodology,count(*) from evidences where method = 'electronic annotation' group by methodology"
+sqlite3 topfind.db "select method,methodology,count(*) from evidences where method = 'electronic annotation' group by methodology" | print_table
 
 echo "Methodologies for cleavages"
 
-sqlite3 topfind.db "select evidences.methodology,count(*) from evidences left join cleavage2evidences on(evidences.id = cleavage2evidences.evidence_id) left join cleavages on (cleavage2evidences.cleavage_id = cleavages.id) join proteins on (cleavages.protease_id = proteins.id) where evidences.method != 'electronic annotation' group by evidences.methodology"
+sqlite3 topfind.db "select evidences.methodology,count(*) from evidences left join cleavage2evidences on(evidences.id = cleavage2evidences.evidence_id) left join cleavages on (cleavage2evidences.cleavage_id = cleavages.id) join proteins on (cleavages.protease_id = proteins.id) where evidences.method != 'electronic annotation' group by evidences.methodology" | print_table
 
 echo "Methodologies for Nterms"
 
-sqlite3 topfind.db "select evidences.methodology,count(*) from evidences left join nterm2evidences on(evidences.id = nterm2evidences.evidence_id) left join nterms on (nterm2evidences.nterm_id = nterms.id) where evidences.method != 'electronic annotation' and nterms.idstring != '' group by evidences.methodology"
+sqlite3 topfind.db "select evidences.methodology,count(*) from evidences left join nterm2evidences on(evidences.id = nterm2evidences.evidence_id) left join nterms on (nterm2evidences.nterm_id = nterms.id) where evidences.method != 'electronic annotation' and nterms.idstring != '' group by evidences.methodology" | print_table
 
 echo "Methodologies for Cterms"
 
-sqlite3 topfind.db "select evidences.methodology,count(*) from evidences left join cterm2evidences on(evidences.id = cterm2evidences.evidence_id) left join cterms on (cterm2evidences.cterm_id = cterms.id) where evidences.method != 'electronic annotation' and cterms.idstring != '' group by evidences.methodology"
+sqlite3 topfind.db "select evidences.methodology,count(*) from evidences left join cterm2evidences on(evidences.id = cterm2evidences.evidence_id) left join cterms on (cterm2evidences.cterm_id = cterms.id) where evidences.method != 'electronic annotation' and cterms.idstring != '' group by evidences.methodology" | print_table
 
 SELECT_CLEAVAGE="select distinct cleavages.idstring,evidences.methodology,proteins.name,proteins.meropsfamily,proteins.meropssubfamily,proteins.meropscode from evidences left join cleavage2evidences on(evidences.id = cleavage2evidences.evidence_id) left join cleavages on (cleavage2evidences.cleavage_id = cleavages.id) join proteins on (cleavages.protease_id = proteins.id) where evidences.method != 'electronic annotation'"
 
 SELECT_CTERMS="select distinct cterms.idstring,evidences.methodology from evidences left join cterm2evidences on(evidences.id = cterm2evidences.evidence_id) left join cterms on (cterm2evidences.cterm_id = cterms.id) where evidences.method != 'electronic annotation' and cterms.idstring != ''"
 SELECT_NTERMS="select distinct nterms.idstring,evidences.methodology from evidences left join nterm2evidences on(evidences.id = nterm2evidences.evidence_id) left join nterms on (nterm2evidences.nterm_id = nterms.id) where evidences.method != 'electronic annotation' and nterms.idstring != ''"
 
-mkdir dist
+if [ ! -d dist ]; then
+	mkdir dist
+fi
 
 run_sql "$SELECT_CLEAVAGE" topfind.db | python expand_idstring.py > dist/cleavages_data.csv
 run_sql "$SELECT_CTERMS" topfind.db | python expand_idstring.py > dist/cterms_data.csv
