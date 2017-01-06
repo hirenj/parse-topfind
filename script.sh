@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=$1
+version=$1
 
 print_table() {
 	sed -e 's/|/,/g' | ./csv2ascii.py - -w 160
@@ -8,38 +8,38 @@ print_table() {
 
 if [ ! -e /tmp/topfind.zip ]; then
 	# Cached get file ?
-	curl -o /tmp/topfind.zip -ssS "http://clipserve.clip.ubc.ca/topfind/downloads/$VERSION.sql.zip"
+	curl -trycache -o /tmp/topfind.zip -ssS "http://clipserve.clip.ubc.ca/topfind/downloads/${version}.sql.zip"
 fi
 
 
-unzip -p /tmp/topfind.zip "$VERSION.sql" > topfind.sql
+unzip -p /tmp/topfind.zip "${version}.sql" > topfind.sql
 
-SQLFILE=topfind.sql
+sqlfile=topfind.sql
 
-TABLESPATH=$(basename $SQLFILE)
+tablespath=$(basename $sqlfile)
 
-if [[ ! -d "$TABLESPATH.tables" || ! -f "$TABLESPATH.tables/cleavages.sql" ]]; then
-	python extract_tables.py $SQLFILE
+if [[ ! -d "${tablespath}.tables" || ! -f "${tablespath}.tables/cleavages.sql" ]]; then
+	python extract_tables.py $sqlfile
 fi
 
 # We need to remove extra quote characters from the extracted fields
 # since awk doesnt handle those fields well.
 
-cat $TABLESPATH.tables/cleavages.sql | python mysqldump_to_csv.py > cleavages.csv
+cat ${tablespath}.tables/cleavages.sql | python mysqldump_to_csv.py > cleavages.csv
 head -n 2 cleavages.csv | print_table
-cat $TABLESPATH.tables/proteins.sql | python mysqldump_to_csv.py | sed -e 's/,"[^"]*/,"/g' > proteins.csv
+cat ${tablespath}.tables/proteins.sql | python mysqldump_to_csv.py | sed -e 's/,"[^"]*/,"/g' > proteins.csv
 head -n 2 proteins.csv | print_table
-cat $TABLESPATH.tables/evidences.sql | python mysqldump_to_csv.py | sed -e 's/"""[^"]*""/"/' | sed -e 's/,"[^"]*/,"/g' > evidences.csv
+cat ${tablespath}.tables/evidences.sql | python mysqldump_to_csv.py | sed -e 's/"""[^"]*""/"/' | sed -e 's/,"[^"]*/,"/g' > evidences.csv
 head -n 2 evidences.csv | print_table
-cat $TABLESPATH.tables/cleavage2evidences.sql | python mysqldump_to_csv.py > cleavage2evidences.csv
+cat ${tablespath}.tables/cleavage2evidences.sql | python mysqldump_to_csv.py > cleavage2evidences.csv
 head -n 2 cleavage2evidences.csv | print_table
-cat $TABLESPATH.tables/cterms.sql | python mysqldump_to_csv.py | sed -e 's/,"[^"]*/,"/g' > cterms.csv
+cat ${tablespath}.tables/cterms.sql | python mysqldump_to_csv.py | sed -e 's/,"[^"]*/,"/g' > cterms.csv
 head -n 2 cterms.csv | print_table
-cat $TABLESPATH.tables/nterms.sql | python mysqldump_to_csv.py | sed -e 's/,"[^"]*/,"/g' > nterms.csv
+cat ${tablespath}.tables/nterms.sql | python mysqldump_to_csv.py | sed -e 's/,"[^"]*/,"/g' > nterms.csv
 head -n 2 nterms.csv | print_table
-cat $TABLESPATH.tables/cterm2evidences.sql | python mysqldump_to_csv.py > cterm2evidences.csv
+cat ${tablespath}.tables/cterm2evidences.sql | python mysqldump_to_csv.py > cterm2evidences.csv
 head -n 2 cterm2evidences.csv | print_table
-cat $TABLESPATH.tables/nterm2evidences.sql | python mysqldump_to_csv.py > nterm2evidences.csv
+cat ${tablespath}.tables/nterm2evidences.sql | python mysqldump_to_csv.py > nterm2evidences.csv
 head -n 2 nterm2evidences.csv | print_table
 
 read_csv() {
@@ -85,16 +85,16 @@ echo "Methodologies for Cterms"
 
 sqlite3 topfind.db "select evidences.methodology,count(*) from evidences left join cterm2evidences on(evidences.id = cterm2evidences.evidence_id) left join cterms on (cterm2evidences.cterm_id = cterms.id) where evidences.method != 'electronic annotation' and cterms.idstring != '' group by evidences.methodology" | print_table
 
-SELECT_CLEAVAGE="select distinct cleavages.idstring,evidences.methodology,proteins.name,proteins.meropsfamily,proteins.meropssubfamily,proteins.meropscode from evidences left join cleavage2evidences on(evidences.id = cleavage2evidences.evidence_id) left join cleavages on (cleavage2evidences.cleavage_id = cleavages.id) join proteins on (cleavages.protease_id = proteins.id) where evidences.method != 'electronic annotation'"
+select_cleavage="select distinct cleavages.idstring,evidences.methodology,proteins.name,proteins.meropsfamily,proteins.meropssubfamily,proteins.meropscode from evidences left join cleavage2evidences on(evidences.id = cleavage2evidences.evidence_id) left join cleavages on (cleavage2evidences.cleavage_id = cleavages.id) join proteins on (cleavages.protease_id = proteins.id) where evidences.method != 'electronic annotation'"
 
-SELECT_CTERMS="select distinct cterms.idstring,evidences.methodology from evidences left join cterm2evidences on(evidences.id = cterm2evidences.evidence_id) left join cterms on (cterm2evidences.cterm_id = cterms.id) where evidences.method != 'electronic annotation' and cterms.idstring != ''"
-SELECT_NTERMS="select distinct nterms.idstring,evidences.methodology from evidences left join nterm2evidences on(evidences.id = nterm2evidences.evidence_id) left join nterms on (nterm2evidences.nterm_id = nterms.id) where evidences.method != 'electronic annotation' and nterms.idstring != ''"
+select_cterms="select distinct cterms.idstring,evidences.methodology from evidences left join cterm2evidences on(evidences.id = cterm2evidences.evidence_id) left join cterms on (cterm2evidences.cterm_id = cterms.id) where evidences.method != 'electronic annotation' and cterms.idstring != ''"
+select_nterms="select distinct nterms.idstring,evidences.methodology from evidences left join nterm2evidences on(evidences.id = nterm2evidences.evidence_id) left join nterms on (nterm2evidences.nterm_id = nterms.id) where evidences.method != 'electronic annotation' and nterms.idstring != ''"
 
 if [ ! -d dist ]; then
 	mkdir dist
 fi
 
-run_sql "$SELECT_CLEAVAGE" topfind.db | python expand_idstring.py > dist/cleavages_data.csv
-run_sql "$SELECT_CTERMS" topfind.db | python expand_idstring.py > dist/cterms_data.csv
-run_sql "$SELECT_NTERMS" topfind.db | python expand_idstring.py > dist/nterms_data.csv
+run_sql "$select_cleavage" topfind.db | python expand_idstring.py > dist/cleavages_data.csv
+run_sql "$select_cterms" topfind.db | python expand_idstring.py > dist/cterms_data.csv
+run_sql "$select_nterms" topfind.db | python expand_idstring.py > dist/nterms_data.csv
 
