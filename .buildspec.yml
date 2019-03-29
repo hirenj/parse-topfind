@@ -8,6 +8,7 @@ phases:
       - npm install -g hirenj/node-reciperunner
   pre_build:
     commands:
+      - curl -I 'https://clipserve.clip.ubc.ca/topfind/download' --connect-timeout 10
       - testversion 'topfind.json' --remote 'http://clipserve.clip.ubc.ca/topfind/download' --regex 'downloads/([\d_A-Za-z]+)\.sql' || (touch VERSION_MATCHING && exit 2)
   build:
     commands:
